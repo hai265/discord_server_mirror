@@ -1,8 +1,5 @@
 import json 
-config = {'guild_to_monitor' : 510460368900849664, 'channel_to_post_in' : 717830745338675281}
-users = {'1' : "hello", '2' : 'nopp'}
-list = []
-list.append(config)
-list.append(users)
-with open('config','w') as outfile:
-    json.dump(list,outfile)
+config = {'guild_to_monitor' : 510460368900849664, "channels_to_post" : {"original_channel_1" : "mirror_channel 2","original_channel2" : "mirror_channel 2x"}}
+with open('config.json','w') as outfile:
+    json.dump(config,outfile, indent=2)
+    json.loads
