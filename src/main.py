@@ -1,17 +1,14 @@
 import discum    
 import json
-import http
 from discum.discum import Client 
 from discum.utils.embed import Embedder
-import requests
-
+import time
+import random
 from requests.api import request
-
-
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
-    url = "https://cdn.discordapp.com/avatars/{}/{}.webp".format(user_id,profile['user']['avatar'])
+    url = "https://cdn.discordapp.com/avatars/{}/{}.webp?size=40".format(user_id,profile['user']['avatar'])
     return url
 
 # Initialize config
@@ -20,8 +17,7 @@ config = json.load(f)
 guild_to_monitor = config['guild_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
 bot = discum.Client(token=config['user_token'], log=False)
-
-
+random.seed()
 @bot.gateway.command
 def helloworld(resp):
     if resp.event.message:
@@ -35,13 +31,20 @@ def helloworld(resp):
             discriminator = m['author']['discriminator']
             content = m['content']
             avatar_url = get_avatar_picture_url(m['author']['id'],bot)
-            # bot.sendFile(str(channel_to_post_in),avatar_url,True)
-            # bot.sendMessage(str(channel_to_post_in),"__**{}**__\n{}".format(username, content))
             embed = Embedder()
+            # Send message in an embed
             embed.title(username)
             embed.thumbnail(avatar_url)
-            embed.description(content)
-            bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            if len(content) != 0:
+                embed.description(content)
+                bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            # Send the attachments
+            embed.description("")
+            for attachment in attachments:
+                time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
+                embed.image(attachment['url'])
+                bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
             # Send a message to the mirror server
 
 bot.gateway.run(auto_reconnect=True)
