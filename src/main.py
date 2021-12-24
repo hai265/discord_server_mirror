@@ -15,7 +15,7 @@ def get_avatar_picture_url(user_id, bot : Client):
 now = datetime.now()
 f = open("config.json")
 config = json.load(f)
-guild_to_monitor = config['guild_to_monitor']
+guilds_to_monitor = config['guilds_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
 bot = discum.Client(token=config['user_token'], log=False)
 random.seed()
@@ -27,7 +27,7 @@ def helloworld(resp):
         m = resp.parsed.auto()
         guildID = m['guild_id'] if 'guild_id' in m else None #because DMs are technically channels too
         channelID = m['channel_id']
-        if int(guildID) == int(guild_to_monitor) and channelID in channels_to_mirror:
+        if guildID in guilds_to_monitor and channelID in channels_to_mirror:
             channel_to_post_in = channels_to_mirror[str(channelID)]
             username = m['author']['username']
             attachments = m['attachments']
