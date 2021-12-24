@@ -2,7 +2,7 @@ import discum
 import json
 from discum.discum import Client 
 from discum.utils.embed import Embedder
-import time
+from datetime import datetime
 import random
 from requests.api import request
 # From a User id, grab the avatar picture
@@ -12,12 +12,15 @@ def get_avatar_picture_url(user_id, bot : Client):
     return url
 
 # Initialize config
+now = datetime.now()
 f = open("config.json")
 config = json.load(f)
 guild_to_monitor = config['guild_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
 bot = discum.Client(token=config['user_token'], log=False)
 random.seed()
+print("Time started: {} ".format(now))
+bot.sendMessage(str(config['debug_channel']),"Time started:{} ".format(now))
 @bot.gateway.command
 def helloworld(resp):
     if resp.event.message:
