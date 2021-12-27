@@ -5,6 +5,7 @@ from discum.utils.embed import Embedder
 from datetime import datetime
 import random
 from requests.api import request
+from json_minify import json_minify
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
@@ -14,7 +15,7 @@ def get_avatar_picture_url(user_id, bot : Client):
 # Initialize config
 now = datetime.now()
 f = open("config.json")
-config = json.load(f)
+config = json.loads(json_minify(f))
 guilds_to_monitor = config['guilds_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
 bot = discum.Client(token=config['user_token'], log=False)
