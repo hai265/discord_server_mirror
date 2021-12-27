@@ -1,5 +1,6 @@
 Discord-S.C.U.M-master/
 config.json
+debug.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

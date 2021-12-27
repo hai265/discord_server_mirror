@@ -1,8 +1,22 @@
 {
-    "user_token": "Your user token here",
-    "guild_to_monitor": 510460368900849664,
-    "channels_to_mirror": {
-      "510460368900849666": "717830745338675281",
-      "923342003993989160": "923342032267776080"
-    }
+  // Discord User Token
+  "user token": "user token",
+  // Guilds that you want to monitor
+  "guilds_to_monitor": ["guild id 1","guild id 2"],
+  // Channel to post debug information
+  "debug channel" : "debug channel id",
+  // Channel to post daily update of bot
+  "status channel": "925101077509074964",
+  // First value is the channel to mirror, second value is the channel the bot will post in
+  // Time to send daily status
+  "time to send status" : "08:00",
+  "channels_to_mirror": {
+    "510460368900849666": "923631892996177940",
+    "768852452132257802": "923376751533490206", 
+    "844990502591397918": "923376805354827816", 
+    "829754942817828884" : "923376877832392745",
+    "811299583803129877" : "923377051254259752",
+    "776223897019219989" : "923377075837079583",
+    "816696269862469652" : "923377098591199282" 
   }
+}

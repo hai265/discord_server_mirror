@@ -1,3 +1,4 @@
+import time
 import discum    
 import json
 from discum.discum import Client 
@@ -6,24 +7,41 @@ from datetime import datetime
 import random
 from requests.api import request
 from json_minify import json_minify
+import schedule
+import datetime
+import threading
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
     url = "https://cdn.discordapp.com/avatars/{}/{}.webp?size=40".format(user_id,profile['user']['avatar'])
     return url
 
+def print_status(bot : Client, channel_to_post : str):
+    current_time = datetime.datetime.now()
+    print("Bot status: operational {} ".format(current_time))
+    bot.sendMessage(str(channel_to_post),"Time started:{} ".format(current_time))    
+def print_status_thread(bot : Client, channel_to_post : str, time_to_send_status : str):
+    print_status(bot, config["status channel"])
+    schedule.every().day.at(time_to_send_status).do(print_status,bot = bot, channel_to_post = config["status channel"])
+    # schedule.every(10).seconds.do(print_status,bot = bot, channel_to_post = config["debug channel"])
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
+        
+
 # Initialize config
-now = datetime.now()
 f = open("config.json")
-config = json.loads(json_minify(f))
+json_string = f.read().replace("// *","")
+config = json.loads(json_minify(json_string))
 guilds_to_monitor = config['guilds_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
-bot = discum.Client(token=config['user_token'], log=False)
 random.seed()
-print("Time started: {} ".format(now))
-bot.sendMessage(str(config['debug_channel']),"Time started:{} ".format(now))
+bot = discum.Client(token=config['user token'], log=False)
+# Start the status thread
+status_thread = threading.Thread(target=print_status_thread,args=(bot,config["status channel"],config["time to send status"]))
+status_thread.start()
 @bot.gateway.command
-def helloworld(resp):
+def monitor_channels(resp):
     if resp.event.message:
         m = resp.parsed.auto()
         guildID = m['guild_id'] if 'guild_id' in m else None #because DMs are technically channels too
