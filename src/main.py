@@ -13,7 +13,7 @@ import threading
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
-    url = "https://cdn.discordapp.com/avatars/{}/{}.webp?size=40".format(user_id,profile['user']['avatar'])
+    url = "https://cdn.discordapp.com/avatars/{}/{}.webp?size=96".format(user_id,profile['user']['avatar'])
     return url
 
 def print_status(bot : Client, channel_to_post : str):
