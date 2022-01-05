@@ -1,2 +1,4 @@
 schedule
 JSON_minify
+slackclient 
+slackeventsapi
