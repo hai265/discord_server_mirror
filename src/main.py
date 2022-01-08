@@ -56,21 +56,21 @@ def monitor_channels(resp):
             discriminator = m['author']['discriminator']
             content = m['content']
             avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
-            embed = Embedder()
-            # Send message in an embed
-            embed.title(username)
-            embed.thumbnail(avatar_url)
-            if len(content) != 0:
-                embed.description(content)
-                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
-            # Send the attachments
-            embed.description("")
-            for attachment in attachments:
-                time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
-                embed.image(attachment['url'])
-                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
-            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
-            # Send a message to the mirror server
+            # embed = Embedder()
+            # # Send message in an embed
+            # embed.title(username)
+            # embed.thumbnail(avatar_url)
+            # if len(content) != 0:
+            #     embed.description(content)
+            #     discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            # # Send the attachments
+            # embed.description("")
+            # for attachment in attachments:
+            #     time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
+            #     embed.image(attachment['url'])
+            #     discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            # print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
+            # # Send a message to the mirror server
 
             # Send the message in the appropriate slack channel
             user_name = m["author"]["username"]
