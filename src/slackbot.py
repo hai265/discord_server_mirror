@@ -61,6 +61,7 @@ class SlackBot:
         conversations = response["channels"]
         for conversation in conversations:
             # Channel already exists - do not create the channel
+                if channel_name == conversation["name"]
                 return False
         return True
     # Returns a channel id give na channel name
