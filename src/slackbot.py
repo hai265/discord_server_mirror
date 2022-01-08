@@ -1,6 +1,7 @@
 # import the random library to help us generate the random numbers
 import random
 from slack import WebClient
+from slack.errors import SlackApiError
 import os
 import logging
 # Create the CoinBot Class
@@ -36,27 +37,32 @@ class SlackBot:
                 *self.generate_slack_message(text),
             ],
         }
+    # Posts a message to the specified channel. Can add username and icon to post on behalf of that user
     def postMessage(self,msg : str, channel_name : str,uName = '',iconUrl = ''):
+        # Create channel if it does not exist already
         # self.client.conversations_join(channel = self.channel_name_to_id(channel_name))
         message = self.get_message_payload(msg,channel_name)
         # Post the onboarding message in Slack
         self.client.chat_postMessage(**message,username = uName, icon_url = iconUrl)
     def create_channel(self,channel_name : str):
+        # Create a new channel with the name
+        try:
+            response = self.client.conversations_create(
+        name=channel_name,
+        is_private = False
+        )
+        except SlackApiError as e:
+            logging.info(e.response["error"])
+            return
+        logging.info("Channel {} created".format(channel_name))
+    # Returns true if a channel with the name exists in the workspace. False otherwise
+    def channel_exists(self,channel_name : str):
         response = self.client.conversations_list()
         conversations = response["channels"]
         for conversation in conversations:
             # Channel already exists - do not create the channel
-            if conversation["name"] == channel_name:
-                print("Channel name already exists")
-                logging.info("Tried to create channel {} but already exists".format(channel_name))
-                return
-        # Create a new channel with the name
-        response = self.client.conversations_create(
-        token=os.environ.get("SLACK_TOKEN"),
-        name=channel_name,
-        is_private = False
-        )
-        logging.info("Channel {} created".format(channel_name))
+                return False
+        return True
     # Returns a channel id give na channel name
     def channel_name_to_id(self,channel_name : str):
         response = self.client.conversations_list()

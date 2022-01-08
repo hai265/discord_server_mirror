@@ -40,6 +40,9 @@ channels_to_mirror = config['channels_to_mirror']
 random.seed()
 discord_bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
 slack_bot = SlackBot()
+# From the config file, create channels that do not exist already
+# for channel in channels_to_mirror.values():
+#     slack_bot.create_channel(channel)
 # Start the status thread
 status_thread = threading.Thread(target=print_status_thread,args=(discord_bot,config["status channel"],config["time to send status"]))
 status_thread.start()
@@ -74,6 +77,9 @@ def monitor_channels(resp):
 
             # Send the message in the appropriate slack channel
             user_name = m["author"]["username"]
-            slack_bot.postMessage(content,"debug_mirror",user_name,avatar_url)
+            # Add attachment links in content as links
+            for attachment in attachments:
+                content += "\n" + str(attachment["url"])
+            slack_bot.postMessage(content,channels_to_mirror[str(channelID)],user_name,avatar_url)
 
 discord_bot.gateway.run(auto_reconnect=True)
