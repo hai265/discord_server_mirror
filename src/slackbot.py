@@ -35,10 +35,10 @@ class SlackBot:
                 *self.generate_slack_message(text),
             ],
         }
-    def postMessage(self,msg : str, channel : str):
+    def postMessage(self,msg : str, channel : str,uName = '',iconUrl = ''):
         message = self.get_message_payload(msg,channel)
         # Post the onboarding message in Slack
-        self.client.chat_postMessage(**message)
+        self.client.chat_postMessage(**message,username = uName, icon_url = iconUrl)
     def create_channel(self,channel_name : str):
         response = self.client.conversations_list()
         conversations = response["channels"]
