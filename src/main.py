@@ -85,6 +85,13 @@ def monitor_channels(resp):
         guilds_to_monitor = config['guilds_to_monitor']
         channels_to_mirror = config['channels_to_mirror']
         if guildID in guilds_to_monitor and channelID in channels_to_mirror:
+            channel_to_post_in = channels_to_mirror[str(channelID)]
+            username = m['author']['username']
+            attachments = m['attachments']
+            discriminator = m['author']['discriminator']
+            content = m['content']
+            avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
+            embed = Embedder()
             # Send a message to the mirror server
             # Send the message in the appropriate slack channel
             user_name = m["author"]["username"]

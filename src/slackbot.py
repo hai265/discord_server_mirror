@@ -27,15 +27,19 @@ class SlackBot:
     # Generate a random number to simulate flipping a coin. Then return the
     # crafted slack payload with the coin flip message.
     def generate_slack_message(self, text : str):
-        return {"type": "section", "text": {"type": "mrkdwn", "text": text}},
+        return {"type": "section", "text": {"type": "mrkdwn", "text": text}}
 
     # Craft and return the entire message payload as a dictionary.
     def get_message_payload(self, text : str, channelName : str):
+        # return {
+        #     "channel": channelName,
+        #     "text": [
+        #         *self.generate_slack_message(text),
+        #     ],
+        # }
         return {
             "channel": channelName,
-            "blocks": [
-                *self.generate_slack_message(text),
-            ],
+            "text": text
         }
     # Posts a message to the specified channel. Can add username and icon to post on behalf of that user
     def postMessage(self,msg : str, channel_name : str,uName = '',iconUrl = ''):
