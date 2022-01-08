@@ -2,6 +2,7 @@
 import random
 from slack import WebClient
 import os
+import logging
 # Create the CoinBot Class
 class SlackBot:
     # Create a constant that contains the default text for the message
@@ -42,7 +43,15 @@ class SlackBot:
         response = self.client.conversations_list()
         conversations = response["channels"]
         for conversation in conversations:
+            # Channel already exists - do not create the channel
             if conversation["name"] == channel_name:
                 print("Channel name already exists")
+                logging.info("Tried to create channel {} but already exists".format(channel_name))
                 return
-        
+        # Create a new channel with the name
+        response = self.client.conversations_create(
+        token=os.environ.get("SLACK_TOKEN"),
+        name=channel_name,
+        is_private = False
+        )
+        logging.info("Channel {} created".format(channel_name))
