@@ -11,6 +11,7 @@ import schedule
 import datetime
 import threading
 import os
+from slackbot import SlackBot
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
@@ -38,6 +39,7 @@ guilds_to_monitor = config['guilds_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
 random.seed()
 bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
+a =bot.getGuildChannels(str(guilds_to_monitor))
 # Start the status thread
 status_thread = threading.Thread(target=print_status_thread,args=(bot,config["status channel"],config["time to send status"]))
 status_thread.start()

@@ -1,4 +1,3 @@
-from slack import WebClient
 from slackbot import SlackBot
 import os
 
