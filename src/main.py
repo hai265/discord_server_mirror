@@ -15,7 +15,7 @@ from slackbot import SlackBot
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
-    url = "https://cdn.discordapp.com/avatars/{}/{}.webp?size=96".format(user_id,profile['user']['avatar'])
+    url = "https://cdn.discordapp.com/avatars/{}/{}.png?size=96".format(user_id,profile['user']['avatar'])
     return url
 
 def print_status(bot : Client, channel_to_post : str):
@@ -38,12 +38,12 @@ config = json.loads(json_minify(json_string))
 guilds_to_monitor = config['guilds_to_monitor']
 channels_to_mirror = config['channels_to_mirror']
 random.seed()
-bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
-a =bot.getGuildChannels(str(guilds_to_monitor))
+discord_bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
+slack_bot = SlackBot()
 # Start the status thread
-status_thread = threading.Thread(target=print_status_thread,args=(bot,config["status channel"],config["time to send status"]))
+status_thread = threading.Thread(target=print_status_thread,args=(discord_bot,config["status channel"],config["time to send status"]))
 status_thread.start()
-@bot.gateway.command
+@discord_bot.gateway.command
 def monitor_channels(resp):
     if resp.event.message:
         m = resp.parsed.auto()
@@ -55,21 +55,25 @@ def monitor_channels(resp):
             attachments = m['attachments']
             discriminator = m['author']['discriminator']
             content = m['content']
-            avatar_url = get_avatar_picture_url(m['author']['id'],bot)
+            avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
             embed = Embedder()
             # Send message in an embed
             embed.title(username)
             embed.thumbnail(avatar_url)
             if len(content) != 0:
                 embed.description(content)
-                bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
             # Send the attachments
             embed.description("")
             for attachment in attachments:
                 time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
                 embed.image(attachment['url'])
-                bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
             print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
             # Send a message to the mirror server
 
-bot.gateway.run(auto_reconnect=True)
+            # Send the message in the appropriate slack channel
+            user_name = m["author"]["username"]
+            slack_bot.postMessage(content,"debug_mirror",user_name,avatar_url)
+
+discord_bot.gateway.run(auto_reconnect=True)

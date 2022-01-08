@@ -17,7 +17,7 @@ class SlackBot:
     }
     # The constructor for the class. It takes the channel name as the a
     # parameter and then sets it as an instance variable
-    def __init__(self, channel : str):
+    def __init__(self):
         logging.info("Slack bot initialized")
         self.client = WebClient(token=os.environ.get("SLACK_TOKEN"))
         # Send a message to the slack #bot-status channel
