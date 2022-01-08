@@ -31,12 +31,9 @@ def print_status_thread(bot : Client, channel_to_post : str, time_to_send_status
         time.sleep(60)
         
 
-# Initialize config
-f = open("config.json")
-json_string = f.read().replace("// *","")
-config = json.loads(json_minify(json_string))
-guilds_to_monitor = config['guilds_to_monitor']
-channels_to_mirror = config['channels_to_mirror']
+
+# Old config to send to discord
+
 random.seed()
 discord_bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
 slack_bot = SlackBot()
@@ -44,14 +41,21 @@ slack_bot = SlackBot()
 # for channel in channels_to_mirror.values():
 #     slack_bot.create_channel(channel)
 # Start the status thread
-status_thread = threading.Thread(target=print_status_thread,args=(discord_bot,config["status channel"],config["time to send status"]))
-status_thread.start()
+# status_thread = threading.Thread(target=print_status_thread,args=(discord_bot,config["status channel"],config["time to send status"]))
+# status_thread.start()
 @discord_bot.gateway.command
 def monitor_channels(resp):
+    # Initialize config
+    f = open("old_config.json")
+    json_string = f.read().replace("// *","")
+    config = json.loads(json_minify(json_string))
+    guilds_to_monitor = config['guilds_to_monitor']
+    channels_to_mirror = config['channels_to_mirror']
     if resp.event.message:
         m = resp.parsed.auto()
         guildID = m['guild_id'] if 'guild_id' in m else None #because DMs are technically channels too
         channelID = m['channel_id']
+        # Send the message to discord
         if guildID in guilds_to_monitor and channelID in channels_to_mirror:
             channel_to_post_in = channels_to_mirror[str(channelID)]
             username = m['author']['username']
@@ -59,22 +63,29 @@ def monitor_channels(resp):
             discriminator = m['author']['discriminator']
             content = m['content']
             avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
-            # embed = Embedder()
-            # # Send message in an embed
-            # embed.title(username)
-            # embed.thumbnail(avatar_url)
-            # if len(content) != 0:
-            #     embed.description(content)
-            #     discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
-            # # Send the attachments
-            # embed.description("")
-            # for attachment in attachments:
-            #     time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
-            #     embed.image(attachment['url'])
-            #     discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
-            # print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
-            # # Send a message to the mirror server
-
+            embed = Embedder()
+            # Send message in an embed
+            embed.title(username)
+            embed.thumbnail(avatar_url)
+            if len(content) != 0:
+                embed.description(content)
+                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            # Send the attachments
+            embed.description("")
+            for attachment in attachments:
+                time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
+                embed.image(attachment['url'])
+                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
+        # Send the message to slack
+        f.close()
+        f = open("config.json")
+        json_string = f.read().replace("// *","")
+        config = json.loads(json_minify(json_string))
+        guilds_to_monitor = config['guilds_to_monitor']
+        channels_to_mirror = config['channels_to_mirror']
+        if guildID in guilds_to_monitor and channelID in channels_to_mirror:
+            # Send a message to the mirror server
             # Send the message in the appropriate slack channel
             user_name = m["author"]["username"]
             # Add attachment links in content as links
