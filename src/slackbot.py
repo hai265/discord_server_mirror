@@ -21,6 +21,8 @@ class SlackBot:
     def __init__(self):
         logging.info("Slack bot initialized")
         self.client = WebClient(token=os.environ.get("SLACK_TOKEN"))
+        # Get the channels in the workspace
+        self.channels = self.client.conversations_list()["channels"]
         # Send a message to the slack #bot-status channel
         self.postMessage("Slack bot initialized.","bot-status")
 
@@ -44,6 +46,8 @@ class SlackBot:
     # Posts a message to the specified channel. Can add username and icon to post on behalf of that user
     def postMessage(self,msg : str, channel_name : str,uName = '',iconUrl = ''):
         # Create channel if it does not exist already
+        if not self.channel_exists(channel_name):
+            self.create_channel(channel_name)
         # self.client.conversations_join(channel = self.channel_name_to_id(channel_name))
         message = self.get_message_payload(msg,channel_name)
         # Post the onboarding message in Slack
@@ -52,22 +56,22 @@ class SlackBot:
         # Create a new channel with the name
         try:
             response = self.client.conversations_create(
-        name=channel_name,
-        is_private = False
-        )
+            name=channel_name,
+            is_private = False
+            )
+            # Update list of channels
+            self.channels.append(response["channel"])
         except SlackApiError as e:
             logging.info(e.response["error"])
             return
         logging.info("Channel {} created".format(channel_name))
     # Returns true if a channel with the name exists in the workspace. False otherwise
     def channel_exists(self,channel_name : str):
-        response = self.client.conversations_list()
-        conversations = response["channels"]
-        for conversation in conversations:
+        for channel in self.channels:
             # Channel already exists - do not create the channel
-                if channel_name == conversation["name"]:
-                    return False
-        return True
+                if channel_name == channel["name"]:
+                    return True
+        return False
     # Returns a channel id give na channel name
     def channel_name_to_id(self,channel_name : str):
         response = self.client.conversations_list()

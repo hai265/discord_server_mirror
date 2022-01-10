@@ -33,9 +33,9 @@ def print_status_thread(bot : Client, channel_to_post : str, time_to_send_status
 
 
 # Old config to send to discord
-
 random.seed()
 discord_bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
+# Initialize slack bot
 slack_bot = SlackBot()
 # From the config file, create channels that do not exist already
 # for channel in channels_to_mirror.values():
