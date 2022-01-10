@@ -34,20 +34,17 @@ def print_status_thread(bot : Client, channel_to_post : str, time_to_send_status
     while True:
         schedule.run_pending()
         time.sleep(60)
-# Converts messages containing <user_id> to @mentions
-def process_message(msg : str, bot : Client):
+# Converts messages containing <user_id> to @mentions, m is the whole message w/ metadata
+def process_message(m, bot : Client):
     # Split message according to space
-    msg_split = msg.split(" ")
+    msg_split = m['content'].split(" ")
+    mentions = m['mentions']
     # Go thru the message and iterate through it
+    mentioned_user = 0
     for i in range(0,len(msg_split)):
         if re.search("<@?!\d+>",msg_split[i]):
-            user_id = re.findall("\d+",msg_split[i])
-            profile = bot.getProfile(user_id[0]).json()
-            if len(profile) == 0:
-                user_name = 'USERNAME'
-            else:
-                user_name = profile['user']['username']
-            msg_split[i] = '@' + str(user_name)
+            msg_split[i] = '@' + mentions[mentioned_user]['username']
+            mentioned_user += 1
     return ' '.join(msg_split)
 
 
@@ -114,7 +111,7 @@ def monitor_channels(resp):
             username = m['author']['username']
             attachments = m['attachments']
             discriminator = m['author']['discriminator']
-            content = process_message(m['content'],discord_bot)
+            content = process_message(m,discord_bot)
             print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
             avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
             # Send a message to the mirror server

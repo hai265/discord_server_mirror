@@ -1,7 +1,6 @@
 # import the random library to help us generate the random numbers
 import random
 from slack import WebClient
-from slack.errors import SlackApiError
 import os
 import logging
 # Create the CoinBot Class
