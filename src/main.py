@@ -14,7 +14,6 @@ import os
 from slackbot import SlackBot
 import re
 # From a User id, grab the avatar picture
-# TODO: This method does not work when looking up a bot
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
     # Return default discord pfp if lookup failed
@@ -71,6 +70,7 @@ slack_bot = SlackBot()
 @discord_bot.gateway.command
 def monitor_channels(resp):
     # Initialize config
+    # TODO: Load configs once
     f = open("old_config.json")
     json_string = f.read().replace("// *","")
     config = json.loads(json_minify(json_string))
