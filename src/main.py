@@ -15,6 +15,7 @@ from slackbot import SlackBot
 # From a User id, grab the avatar picture
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
+    # Check for "unknown user and code 10013"
     url = "https://cdn.discordapp.com/avatars/{}/{}.png?size=96".format(user_id,profile['user']['avatar'])
     return url
 
@@ -63,6 +64,7 @@ def monitor_channels(resp):
             discriminator = m['author']['discriminator']
             content = m['content']
             avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
+            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
             embed = Embedder()
             # Send message in an embed
             embed.title(username)
@@ -76,7 +78,6 @@ def monitor_channels(resp):
                 time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
                 embed.image(attachment['url'])
                 discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
-            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
         # Send the message to slack
         f.close()
         f = open("config.json")
