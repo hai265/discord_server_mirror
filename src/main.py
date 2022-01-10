@@ -35,7 +35,13 @@ def print_status_thread(bot : Client, channel_to_post : str, time_to_send_status
         schedule.run_pending()
         time.sleep(60)
 # Converts messages containing <user_id> to @mentions, m is the whole message w/ metadata
-def process_message(m, bot : Client):
+def process_message(m):
+    # If the message is a reply of another message, process the original message and append it to beginning of message
+    if m['type'] == 'reply':
+        referenced_message ='*{0}*: {1}\n *Reply:* '.format(m['referenced_message']['author']['username'],process_message(m['referenced_message']))
+        # referenced_message = m['referenced_message']['author']['username'] +':' + process_message(m['referenced_message']) +'\n*Reply: *'
+    else:
+        referenced_message = ''
     # Split message according to space
     msg_split = m['content'].split(" ")
     mentions = m['mentions']
@@ -45,7 +51,7 @@ def process_message(m, bot : Client):
         if re.search("<@?!\d+>",msg_split[i]):
             msg_split[i] = '@' + mentions[mentioned_user]['username']
             mentioned_user += 1
-    return ' '.join(msg_split)
+    return referenced_message  + ' '.join(msg_split)
 
 
 
@@ -111,7 +117,7 @@ def monitor_channels(resp):
             username = m['author']['username']
             attachments = m['attachments']
             discriminator = m['author']['discriminator']
-            content = process_message(m,discord_bot)
+            content = process_message(m)
             print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
             avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
             # Send a message to the mirror server
