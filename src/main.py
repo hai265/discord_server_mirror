@@ -12,9 +12,14 @@ import datetime
 import threading
 import os
 from slackbot import SlackBot
+import re
 # From a User id, grab the avatar picture
+# TODO: This method does not work when looking up a bot
 def get_avatar_picture_url(user_id, bot : Client):
     profile = bot.getProfile(user_id).json()
+    # Return default discord pfp if lookup failed
+    if 'user' not in profile:
+        return 'https://discord.com/assets/1f0bfc0865d324c2587920a7d80c609b.png'
     # Check for "unknown user and code 10013"
     url = "https://cdn.discordapp.com/avatars/{}/{}.png?size=96".format(user_id,profile['user']['avatar'])
     return url
@@ -30,6 +35,25 @@ def print_status_thread(bot : Client, channel_to_post : str, time_to_send_status
     while True:
         schedule.run_pending()
         time.sleep(60)
+# Converts messages containing <user_id> to @mentions
+def process_message(msg : str, bot : Client):
+    # Split message according to space
+    msg_split = msg.split(" ")
+    # Go thru the message and iterate through it
+    for i in range(0,len(msg_split)):
+        if re.search("<@?!\d+>",msg_split[i]):
+            user_id = re.findall("\d+",msg_split[i])
+            profile = bot.getProfile(user_id[0]).json()
+            if len(profile) == 0:
+                user_name = 'USERNAME'
+            else:
+                user_name = profile['user']['username']
+            msg_split[i] = '@' + str(user_name)
+    return ' '.join(msg_split)
+
+
+
+
         
 
 
@@ -63,8 +87,8 @@ def monitor_channels(resp):
             attachments = m['attachments']
             discriminator = m['author']['discriminator']
             content = m['content']
-            avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
             print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
+            avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
             embed = Embedder()
             # Send message in an embed
             embed.title(username)
@@ -90,9 +114,9 @@ def monitor_channels(resp):
             username = m['author']['username']
             attachments = m['attachments']
             discriminator = m['author']['discriminator']
-            content = m['content']
+            content = process_message(m['content'],discord_bot)
+            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
             avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
-            embed = Embedder()
             # Send a message to the mirror server
             # Send the message in the appropriate slack channel
             user_name = m["author"]["username"]
