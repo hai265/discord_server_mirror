@@ -28,7 +28,7 @@ class SlackBot:
         self.postMessage("Slack bot initialized.","bot-status")
     # Loads the config file
     def load_config(self, config_name):
-        f = open("config.json")
+        f = open(config_name)
         json_string = f.read().replace("// *", "")
         config = json.loads(json_minify(json_string))
         self.guilds_to_monitor = config['guilds_to_monitor']

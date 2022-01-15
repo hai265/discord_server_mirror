@@ -3,6 +3,7 @@ config.json
 old_config.json
 debug.json
 .vscode
+.out
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
