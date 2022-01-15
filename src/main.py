@@ -64,7 +64,7 @@ random.seed()
 discord_bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
 # Initialize slack bot
 slack_bot = SlackBot()
-slack_bot.load_config("config.json")
+slack_bot.load_config("config/config.json")
 # From the config file, create channels that do not exist already
 # for channel in channels_to_mirror.values():
 #     slack_bot.create_channel(channel)
