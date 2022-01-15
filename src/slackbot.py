@@ -3,6 +3,8 @@ import random
 from slack_sdk import WebClient
 import os
 import logging
+from json_minify import json_minify
+import json
 # Create the CoinBot Class
 class SlackBot:
     # Create a constant that contains the default text for the message
@@ -24,7 +26,14 @@ class SlackBot:
         self.channels = self.client.conversations_list()["channels"]
         # Send a message to the slack #bot-status channel
         self.postMessage("Slack bot initialized.","bot-status")
-
+    # Loads the config file
+    def load_config(self, config_name):
+        f = open("config.json")
+        json_string = f.read().replace("// *", "")
+        config = json.loads(json_minify(json_string))
+        self.guilds_to_monitor = config['guilds_to_monitor']
+        self.channels_to_mirror = config['channels_to_mirror']
+        f.close()
     # Generate a random number to simulate flipping a coin. Then return the
     # crafted slack payload with the coin flip message.
     def generate_slack_message(self, text : str):

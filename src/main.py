@@ -6,7 +6,7 @@ from discum.utils.embed import Embedder
 from datetime import datetime
 import random
 from requests.api import request
-from json_minify import json_minify
+
 import schedule
 import datetime
 import threading
@@ -64,6 +64,7 @@ random.seed()
 discord_bot = discum.Client(token=os.environ.get("DISCORD_TOKEN"), log=False)
 # Initialize slack bot
 slack_bot = SlackBot()
+slack_bot.load_config("config.json")
 # From the config file, create channels that do not exist already
 # for channel in channels_to_mirror.values():
 #     slack_bot.create_channel(channel)
@@ -72,48 +73,53 @@ slack_bot = SlackBot()
 # status_thread.start()
 @discord_bot.gateway.command
 def monitor_channels(resp):
+    loaded = False
     # Initialize config
     # TODO: Load configs once
-    f = open("old_config.json")
-    json_string = f.read().replace("// *","")
-    config = json.loads(json_minify(json_string))
-    guilds_to_monitor = config['guilds_to_monitor']
-    channels_to_mirror = config['channels_to_mirror']
+    # if not loaded:
+    #     f = open("old_config.json")
+    #     json_string = f.read().replace("// *","")
+    #     config = json.loads(json_minify(json_string))
+    #     guilds_to_monitor = config['guilds_to_monitor']
+    #     channels_to_mirror = config['channels_to_mirror']
+    #     f.close()
+    #     loaded = True
     if resp.event.message:
         m = resp.parsed.auto()
         guildID = m['guild_id'] if 'guild_id' in m else None #because DMs are technically channels too
         channelID = m['channel_id']
         # Send the message to discord
-        if guildID in guilds_to_monitor and channelID in channels_to_mirror:
-            channel_to_post_in = channels_to_mirror[str(channelID)]
-            username = m['author']['username']
-            attachments = m['attachments']
-            discriminator = m['author']['discriminator']
-            content = m['content']
-            print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
-            avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
-            embed = Embedder()
-            # Send message in an embed
-            embed.title(username)
-            embed.thumbnail(avatar_url)
-            if len(content) != 0:
-                embed.description(content)
-                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
-            # Send the attachments
-            embed.description("")
-            for attachment in attachments:
-                time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
-                embed.image(attachment['url'])
-                discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+        # if guildID in guilds_to_monitor and channelID in channels_to_mirror:
+        #     channel_to_post_in = channels_to_mirror[str(channelID)]
+        #     username = m['author']['username']
+        #     attachments = m['attachments']
+        #     discriminator = m['author']['discriminator']
+        #     content = m['content']
+        #     print("> guild {} channel {} | {}#{}: {} with {} attachments".format(guildID, channelID, username, discriminator, content, len(attachments)))
+        #     avatar_url = get_avatar_picture_url(m['author']['id'],discord_bot)
+        #     embed = Embedder()
+        #     # Send message in an embed
+        #     embed.title(username)
+        #     embed.thumbnail(avatar_url)
+        #     if len(content) != 0:
+        #         embed.description(content)
+        #         discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
+        #     # Send the attachments
+        #     embed.description("")
+        #     for attachment in attachments:
+        #         time.sleep(random.randrange(1,3) + (random.randrange(0,100) / 100))
+        #         embed.image(attachment['url'])
+        #         discord_bot.sendMessage(str(channel_to_post_in),"",embed=embed.read())
         # Send the message to slack
-        f.close()
-        f = open("config.json")
-        json_string = f.read().replace("// *","")
-        config = json.loads(json_minify(json_string))
-        guilds_to_monitor = config['guilds_to_monitor']
-        channels_to_mirror = config['channels_to_mirror']
-        if guildID in guilds_to_monitor and channelID in channels_to_mirror:
-            channel_to_post_in = channels_to_mirror[str(channelID)]
+        # if not loaded1:
+        #     f = open("config.json")
+        #     json_string = f.read().replace("// *","")
+        #     config = json.loads(json_minify(json_string))
+        #     guilds_to_monitor = config['guilds_to_monitor']
+        #     channels_to_mirror = config['channels_to_mirror']
+        #     loaded1=True
+
+        if guildID in slack_bot.guilds_to_monitor and channelID in slack_bot.channels_to_mirror:
             username = m['author']['username']
             attachments = m['attachments']
             discriminator = m['author']['discriminator']
@@ -126,6 +132,7 @@ def monitor_channels(resp):
             # Add attachment links in content as links
             for attachment in attachments:
                 content += "\n" + str(attachment["url"])
-            slack_bot.postMessage(content,channels_to_mirror[str(channelID)],user_name,avatar_url)
+            slack_bot.postMessage(
+                content, slack_bot.channels_to_mirror[str(channelID)], user_name, avatar_url)
 
 discord_bot.gateway.run(auto_reconnect=True)
