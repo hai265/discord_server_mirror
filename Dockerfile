@@ -1,6 +1,4 @@
-FROM python:3.9-slim-bullseye
-RUN apk add git
-RUN apk add --update py-pip
+FROM python:3
 RUN pip install --user --upgrade git+https://github.com/Merubokkusu/Discord-S.C.U.M.git#egg=discum
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
